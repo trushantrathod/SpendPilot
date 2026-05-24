@@ -19,7 +19,7 @@
 
 **Plan for tomorrow:** Integrate an LLM API (Anthropic or Gemini) to generate the personalized ~100-word audit summary (Feature 4), ensure it has a graceful fallback mechanism if the API fails, and draft the 5 mandatory automated tests for the audit engine.
 
-## Day 3 2026-05-23
+## Day 3 and 4 2026-05-23
 **Hours worked:** 3.0
 **What I did:** - Built the Results Dashboard (Feature 3) with a 3-tier dynamic lead capture form based on the user's calculated savings.
 - Engineered `app/api/generate-summary/route.ts` to securely handle AI requests on the server side.
@@ -32,3 +32,17 @@
 **Blockers / what I'm stuck on:** Navigating Google's model versions took some debugging (had to switch from `gemini-1.5-flash` to `gemini-2.5-flash` to resolve a 404 error based on API key provisioning).
 
 **Plan for tomorrow:** Build Feature 5: The Backend Lead Capture. I will set up a database to securely store the emails users submit when they want to save their audit or get notified of future savings.
+
+## Day 5 2026-05-24
+**Hours worked:** 2.5
+**What I did:** - Set up a Firebase project and integrated Firestore to securely capture and store user leads (Feature 5).
+- Implemented an invisible "Honeypot" form field as a frictionless, zero-dependency method for basic abuse protection.
+- Integrated the Resend SDK and created a secure Next.js API route (`app/api/send-email/route.ts`) to handle transactional emails.
+- Engineered dynamic email templates that automatically switch between "Standard" and "High Savings" messaging based on the user's calculated $500 threshold.
+- Finalized UI success states and cleaned up unused boilerplate files (SVG logos).
+
+**What I learned:** I learned how to securely chain server-side API calls in Next.js (saving to Firebase, then pinging Resend). I also learned that a simple honeypot is often a much better UX choice for MVP abuse protection than forcing users to solve an hCaptcha. Finally, I learned about Resend's free tier domain limitations and how to test transactional emails properly.
+
+**Blockers / what I'm stuck on:** The MVP is officially complete! The only minor hurdle today was ensuring Tailwind v4 compiled correctly without third-party plugins by extracting custom CSS `@keyframes` and standardizing pseudo-classes.
+
+**Plan for tomorrow:** Submit the final assignment repo, start reviewing the feedback from my user interviews, and take a well-deserved break!

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { runAudit, type AuditReport } from "@/lib/auditEngine";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 type ToolEntry = {
   id: string;
@@ -50,6 +52,14 @@ export default function SpendForm() {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Lead Capture States
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("spendpilot_state");
@@ -71,6 +81,8 @@ export default function SpendForm() {
     setReport(generatedReport);
     setIsGenerating(true);
     setAiSummary(null);
+    setSubmitSuccess(false); // Reset success state on new run
+    
     try {
       const response = await fetch("/api/generate-summary", {
         method: "POST",
@@ -84,6 +96,52 @@ export default function SpendForm() {
       setAiSummary("Your stack has been audited. Based on your team size and use case, we found specific adjustments that could optimize your run rate. Review the breakdown below.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSaveLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // HONEYPOT CHECK: If the invisible bot field has any text, silently reject
+    if (honeypot !== "") {
+      console.warn("Bot detected. Silently rejecting.");
+      setSubmitSuccess(true); // Fake success to trick the bot
+      return;
+    }
+
+    if (!email) return;
+
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Save to Firebase Database
+      await addDoc(collection(db, "leads"), {
+        email,
+        company: company || "Not provided",
+        role: role || "Not provided",
+        teamSize: state.teamSize,
+        totalSpend: report?.totalMonthlySavings || 0,
+        highSavings: (report?.totalMonthlySavings || 0) > 500,
+        createdAt: serverTimestamp(),
+      });
+      
+      // 2. Trigger the Resend Transactional Email
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          totalSpend: report?.totalMonthlySavings || 0,
+          highSavings: (report?.totalMonthlySavings || 0) > 500,
+        }),
+      });
+
+      setSubmitSuccess(true);
+    } catch (error) {
+      console.error("Error saving lead: ", error);
+      alert("Failed to save report. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -168,31 +226,64 @@ export default function SpendForm() {
 
         {/* LEAD CAPTURE SECTION */}
         <div className="lead-capture-box">
-          {report.totalMonthlySavings > 500 ? (
-            <>
-              <h3 className="text-2xl font-bold text-white mb-3">Don't leave ${report.totalAnnualSavings.toFixed(0)} on the table.</h3>
-              <p className="text-indigo-200 mb-6 max-w-xl mx-auto">Your infrastructure footprint is large enough to qualify for wholesale credit pooling. Book a Credex consultation to capture these savings.</p>
-              <form className="flex flex-col sm:flex-row justify-center max-w-md mx-auto gap-2">
-                <input type="email" required placeholder="founder@startup.com" className="input-transparent bg-black/40 border border-indigo-500/30 rounded-xl p-3 focus:border-indigo-400" />
-                <button type="submit" className="btn-submit-primary">Book Consult</button>
-              </form>
-            </>
-          ) : report.totalMonthlySavings < 100 || report.recommendations.length === 0 ? (
-            <>
-              <h3 className="text-xl font-bold text-emerald-400 mb-2">You're spending well.</h3>
-              <p className="text-slate-400 mb-6 text-sm">We couldn't find major waste. But AI pricing changes weekly. Drop your email and we'll notify you when new optimizations apply to your stack.</p>
-              <form className="flex flex-col sm:flex-row justify-center max-w-md mx-auto gap-2">
-                <input type="email" required placeholder="name@company.com" className="input-transparent bg-black/40 border border-white/10 rounded-xl p-3 focus:border-white/30" />
-                <button type="submit" className="btn-submit-secondary">Notify Me</button>
-              </form>
-            </>
+          {submitSuccess ? (
+            <div className="py-8 animate-in fade-in zoom-in duration-500">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Audit Saved!</h3>
+              <p className="text-slate-400">Check your inbox shortly for your full report and next steps.</p>
+            </div>
           ) : (
             <>
-              <h3 className="text-xl font-bold text-white mb-2">Capture your ${report.totalMonthlySavings.toFixed(0)}/mo savings.</h3>
-              <p className="text-slate-400 mb-6 text-sm">Enter your email to save this report and get a step-by-step migration guide to optimize your stack.</p>
-              <form className="flex flex-col sm:flex-row justify-center max-w-md mx-auto gap-2">
-                <input type="email" required placeholder="name@company.com" className="input-transparent bg-black/40 border border-white/10 rounded-xl p-3 focus:border-white/30" />
-                <button type="submit" className="btn-submit-primary">Save Report</button>
+              {report.totalMonthlySavings > 500 ? (
+                <>
+                  <h3 className="text-2xl font-bold text-white mb-3">Don't leave ${report.totalAnnualSavings.toFixed(0)} on the table.</h3>
+                  <p className="text-indigo-200 mb-6 max-w-xl mx-auto">Your infrastructure footprint is large enough to qualify for wholesale credit pooling. Book a Credex consultation to capture these savings.</p>
+                </>
+              ) : report.totalMonthlySavings < 100 || report.recommendations.length === 0 ? (
+                <>
+                  <h3 className="text-xl font-bold text-emerald-400 mb-2">You're spending well.</h3>
+                  <p className="text-slate-400 mb-6 text-sm">We couldn't find major waste. But AI pricing changes weekly. Drop your email and we'll notify you when new optimizations apply to your stack.</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-bold text-white mb-2">Capture your ${report.totalMonthlySavings.toFixed(0)}/mo savings.</h3>
+                  <p className="text-slate-400 mb-6 text-sm">Enter your details to save this report and get a step-by-step migration guide to optimize your stack.</p>
+                </>
+              )}
+
+              <form onSubmit={handleSaveLead} className="max-w-md mx-auto space-y-4">
+                {/* INVISIBLE HONEYPOT FIELD FOR BOTS */}
+                <input 
+                  type="text" 
+                  style={{ display: 'none' }} 
+                  tabIndex={-1} 
+                  autoComplete="off" 
+                  value={honeypot} 
+                  onChange={(e) => setHoneypot(e.target.value)} 
+                />
+                
+                <input 
+                  type="email" required placeholder="Email Address *" 
+                  className="input-transparent bg-black/40 border border-white/10 rounded-xl p-3 focus:border-indigo-400" 
+                  value={email} onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="flex gap-4">
+                  <input 
+                    type="text" placeholder="Company (Optional)" 
+                    className="input-transparent bg-black/40 border border-white/10 rounded-xl p-3 focus:border-indigo-400 flex-1" 
+                    value={company} onChange={(e) => setCompany(e.target.value)}
+                  />
+                  <input 
+                    type="text" placeholder="Role (Optional)" 
+                    className="input-transparent bg-black/40 border border-white/10 rounded-xl p-3 focus:border-indigo-400 flex-1" 
+                    value={role} onChange={(e) => setRole(e.target.value)}
+                  />
+                </div>
+                <button type="submit" disabled={isSubmitting} className="btn-submit-primary w-full disabled:opacity-50 flex justify-center items-center">
+                  {isSubmitting ? "Processing..." : (report.totalMonthlySavings > 500 ? "Book Consult" : "Save Report")}
+                </button>
               </form>
             </>
           )}

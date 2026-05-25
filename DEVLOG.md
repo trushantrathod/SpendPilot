@@ -46,3 +46,24 @@
 **Blockers / what I'm stuck on:** The MVP is officially complete! The only minor hurdle today was ensuring Tailwind v4 compiled correctly without third-party plugins by extracting custom CSS `@keyframes` and standardizing pseudo-classes.
 
 **Plan for tomorrow:** Submit the final assignment repo, start reviewing the feedback from my user interviews, and take a well-deserved break!
+
+**Day 6: The Viral Loop & Server-Side Rendering**
+* Built the shareable public report URL (`/report/[id]`).
+* Engineered the page to fetch Firestore data via REST on the server, completely stripping out PII (email/company) before it reaches the client.
+* Implemented dynamic Open Graph (OG) metadata to generate Twitter/LinkedIn cards that prominently display the user's calculated savings dollar amount to drive viral click-throughs.
+* Resolved Next.js 15 breaking changes regarding asynchronous `Promise`-based routing parameters.
+
+## Day 6 2026-05-25
+**Hours worked:** 2.0
+**What I did:** - Engineered the "Viral Loop" by creating a dynamic, shareable public report URL (Feature 6).
+- Updated the Firebase payload to store the full stack configuration and recommendation array so the public link has data to render.
+- Built a server-side rendered public route (`app/report/[id]/page.tsx`) that fetches data via the Firebase REST API to bypass complex client-side SDK auth.
+- Implemented dynamic Open Graph (OG) and Twitter Card metadata for rich social media link previews, automatically injecting the user's calculated savings.
+- Ensured strict data privacy on the public route by explicitly stripping out the user's email and company name.
+- Upgraded dynamic routing logic to comply with Next.js 15's new asynchronous `Promise`-based `params` API.
+
+**What I learned:** I learned how powerful server-side rendering is for SEO and social sharing (OG tags). I also learned how to use a REST API to fetch Firebase data on the server, and how Next.js 15 handles dynamic route parameters differently than Next.js 14 by requiring `await params`. 
+
+**Blockers / what I'm stuck on:** I hit a 404 error when setting up the dynamic route because I accidentally placed the `report` folder inside the `api` directory, which confused the Next.js App Router. I also hit a minor build error due to the Next.js 15 `Promise` update, but quickly debugged and resolved both issues.
+
+**Plan for tomorrow:** The MVP is officially 100% complete! My only plan is to submit the final GitHub repository, review the feedback from my user interviews.

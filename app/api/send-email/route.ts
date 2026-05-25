@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// Initialize Resend with your API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
@@ -10,15 +9,13 @@ export async function POST(req: Request) {
     const { email, totalSpend, highSavings } = body;
 
     if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is missing from .env.local");
+      throw new Error("RESEND_API_KEY is missing");
     }
 
-    // 1. Dynamic Subject Line
     const subject = highSavings 
       ? "Action Required: Your Credex AI Spend Audit" 
       : "Your AI Spend Audit Results";
 
-    // 2. Dynamic Email Body (Matching the assignment logic)
     const htmlContent = highSavings
       ? `
         <div style="font-family: sans-serif; color: #333; max-w: 600px; margin: 0 auto;">
@@ -39,8 +36,6 @@ export async function POST(req: Request) {
         </div>
       `;
 
-    // 3. Send the Email
-    // CRITICAL: On the free tier, Resend forces you to use "onboarding@resend.dev" as the sender.
     const data = await resend.emails.send({
       from: "Credex Audits <onboarding@resend.dev>",
       to: email,
@@ -49,7 +44,6 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, data });
-
   } catch (error) {
     console.error("Resend API Error:", error);
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });

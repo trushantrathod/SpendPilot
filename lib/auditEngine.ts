@@ -34,40 +34,21 @@ export function runAudit(data: FormState): AuditReport {
   const hasCopilot = data.tools.some(t => t.name === "GitHub Copilot");
 
   data.tools.forEach(tool => {
-    let savings = 0;
-
-    // RULE 1: Overkill Plans (Single user on a Team plan)
-    if (tool.seats === 1 && tool.plan.toLowerCase().includes("team")) {
-      const standardProCost = 20; // Most Pro plans are $20
-      if (tool.spend > standardProCost) {
-        savings = tool.spend - standardProCost;
-        recommendations.push({
-          toolName: tool.name,
-          currentSpend: tool.spend,
-          recommendedAction: `Downgrade to Pro/Individual`,
-          savingsMonthly: savings,
-          reasoning: `A Team plan is unnecessary for 1 seat. Downgrading optimizes per-user cost while retaining premium features.`
-        });
-      }
+    // Priority 1: 100% Savings (Redundant Tools)
+    if (data.useCase.toLowerCase() === "coding" && tool.name === "ChatGPT" && (hasCursor || hasCopilot)) {
+      recommendations.push({
+        toolName: tool.name,
+        currentSpend: tool.spend,
+        recommendedAction: `Cancel Subscription`,
+        savingsMonthly: tool.spend,
+        reasoning: `For coding, IDE-integrated tools like Cursor/Copilot are superior. They include top-tier LLM access, making a separate ChatGPT subscription redundant.`
+      });
+      totalMonthlySavings += tool.spend;
     }
-
-    // RULE 2: Redundant Coding Tools
-    if (data.useCase.toLowerCase() === "coding") {
-      if (tool.name === "ChatGPT" && (hasCursor || hasCopilot)) {
-        savings = tool.spend;
-        recommendations.push({
-          toolName: tool.name,
-          currentSpend: tool.spend,
-          recommendedAction: `Cancel Subscription`,
-          savingsMonthly: savings,
-          reasoning: `For coding, IDE-integrated tools like Cursor/Copilot are superior. They include top-tier LLM access, making a separate ChatGPT subscription redundant.`
-        });
-      }
-    }
-
-    // RULE 3: API vs Chat UI Waste for large teams
-    if (tool.name === "ChatGPT" && tool.seats > 10 && tool.spend >= 300) {
-      savings = tool.spend * 0.4; // Estimate 40% savings moving to API/Credex
+    
+    // Priority 2: 40% Savings (API Migration for large teams)
+    else if (tool.name === "ChatGPT" && tool.seats > 10 && tool.spend >= 300) {
+      const savings = tool.spend * 0.4; // Estimate 40% savings moving to API/Credex
       recommendations.push({
         toolName: tool.name,
         currentSpend: tool.spend,
@@ -75,9 +56,24 @@ export function runAudit(data: FormState): AuditReport {
         savingsMonthly: savings,
         reasoning: `At ${tool.seats} seats, paying retail per-user UI licenses is inefficient. Transitioning to API usage or discounted pooled credits via Credex reduces bulk overhead.`
       });
+      totalMonthlySavings += savings;
     }
-
-    totalMonthlySavings += savings;
+    
+    // Priority 3: Partial Savings (Downgrading Overkill Plans)
+    else if (tool.seats === 1 && tool.plan.toLowerCase().includes("team")) {
+      const standardProCost = 20; // Most Pro plans are $20
+      if (tool.spend > standardProCost) {
+        const savings = tool.spend - standardProCost;
+        recommendations.push({
+          toolName: tool.name,
+          currentSpend: tool.spend,
+          recommendedAction: `Downgrade to Pro/Individual`,
+          savingsMonthly: savings,
+          reasoning: `A Team plan is unnecessary for 1 seat. Downgrading optimizes per-user cost while retaining premium features.`
+        });
+        totalMonthlySavings += savings;
+      }
+    }
   });
 
   return {

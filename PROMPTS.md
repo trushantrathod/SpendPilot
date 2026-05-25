@@ -1,21 +1,17 @@
-# AI Prompts Used
+# AI Prompt Configuration
 
-## Feature 4: Executive Summary Generation
-**LLM Used:** Google Gemini 1.5 Flash
-**Verified:** 2026-05-23
+**Model Used:** Google Gemini (`gemini-2.5-flash`)
+**Implementation:** Secure server-side execution via Next.js Route Handlers (`app/api/generate-summary/route.ts`).
+**Fallback Mechanism:** If the API times out or fails, the frontend catches the error and gracefully degrades to a hardcoded, professional text string to ensure zero UI breakage.
 
-### System Prompt
-```text
-You are an expert SaaS financial auditor. Analyze the following AI tool spend data for a company.
+## The Executive Summary Prompt
+This prompt is dynamically injected with the user's calculated state (`teamSize`, `totalSpend`, and `totalMonthlySavings`) before being sent to the LLM. It strictly enforces length and formatting constraints.
 
-Company Profile:
-- Team Size: [DYNAMIC_TEAM_SIZE]
-- Primary Use Case: [DYNAMIC_USE_CASE]
+\`\`\`text
+You are an expert SaaS financial auditor. Write a 80-100 word executive summary for a company with ${state.teamSize} employees. 
 
-Financial Audit Results:
-- Total Monthly Spend: $[DYNAMIC_SPEND]
-- Potential Monthly Savings: $[DYNAMIC_SAVINGS]
-- Number of Inefficient Tools: [DYNAMIC_REC_COUNT]
+Their total monthly AI spend is $${state.tools.reduce((acc: number, t: any) => acc + t.spend, 0)}.
+We found $${report.totalMonthlySavings} in potential monthly savings by recommending they cancel certain tools.
 
-Task: Write a highly personalized, professional executive summary (exactly 80 to 100 words) explaining their current situation and why they should take action based on the audit. 
-Tone: Urgent but professional. Speak directly to the founder. Do NOT use bullet points. Do NOT include greetings like "Dear Founder". Just output the pure paragraph.
+Write a compelling, professional summary of these findings. Do NOT use bullet points. Do NOT include greetings or sign-offs. Be direct and analytical.
+\`\`\`

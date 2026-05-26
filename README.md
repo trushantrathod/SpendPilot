@@ -74,8 +74,7 @@ During this 7-day sprint, the following architectural and product decisions were
 3. **Frictionless UI/UX Email Gating:** I built an open entry pipeline where users get full interactive access to the audit engine dashboard completely free without upfront signup. **Why:** The email lead capture field is exclusively injected *after* financial value is proven on-screen. This trade-off risks anonymous API usage but vastly maximizes B2B conversion rates by building upfront trust.
 
 
-4. 
-**CSS Honeypot over hCaptcha Vendor Packages:** To secure lead generation pipelines from automated spam scripts, I constructed a zero-dependency invisible CSS honeypot rather than using hCaptcha. **Why:** Captchas introduce severe user friction and heavy third-party JavaScript that damages Lighthouse performance scores. A honeypot provides robust basic spam protection while keeping the UI frictionless and Lighthouse scores at 98+.
+4. **CSS Honeypot over hCaptcha Vendor Packages:** To secure lead generation pipelines from automated spam scripts, I constructed a zero-dependency invisible CSS honeypot rather than using hCaptcha. **Why:** Captchas introduce severe user friction and heavy third-party JavaScript that damages Lighthouse performance scores. A honeypot provides robust basic spam protection while keeping the UI frictionless and Lighthouse scores at 98+.
 
 
 5. **Next.js 15 Async Routing API Adaptation:** Adopting Next.js 15 introduced a breaking change where dynamic route parameters are structured as native Promises. **Why:** Instead of reverting to Next.js 14, I refactored the infrastructure to explicitly handle `await params` within server-side components. This trade-off required slightly more complex data-fetching logic but ensured the application is built on the most modern, future-proof Next.js architecture.

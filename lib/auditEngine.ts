@@ -27,7 +27,7 @@ export type AuditReport = {
 };
 
 export function runAudit(data: FormState): AuditReport {
-  let recommendations: AuditRecommendation[] = [];
+  const recommendations: AuditRecommendation[] = [];
   let totalMonthlySavings = 0;
 
   const hasCursor = data.tools.some(t => t.name === "Cursor");

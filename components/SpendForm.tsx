@@ -198,7 +198,7 @@ export default function SpendForm() {
     setMounted(true);
     const saved = localStorage.getItem("spendpilot_state");
     if (saved) {
-      try { setState(JSON.parse(saved)); } catch (e) { console.error("Failed to parse saved state"); }
+      try { setState(JSON.parse(saved)); } catch { console.error("Failed to parse saved state"); }
     }
   }, []);
 
@@ -207,7 +207,7 @@ export default function SpendForm() {
   }, [state, mounted]);
 
   const addTool = () => setState({ ...state, tools: [...state.tools, { id: crypto.randomUUID(), name: AVAILABLE_TOOLS[0], plan: "", spend: 0, seats: 1 }] });
-  const updateTool = (id: string, field: keyof ToolEntry, value: any) => setState({ ...state, tools: state.tools.map(t => t.id === id ? { ...t, [field]: value } : t) });
+  const updateTool = (id: string, field: keyof ToolEntry, value: string | number) => setState({ ...state, tools: state.tools.map(t => t.id === id ? { ...t, [field]: value } : t) });
   const removeTool = (id: string) => setState({ ...state, tools: state.tools.filter(t => t.id !== id) });
 
   const handleRunAudit = async () => {
@@ -337,8 +337,8 @@ export default function SpendForm() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="sp-success-box__title">You're spending well!</p>
-                <p className="sp-success-box__body">We couldn't find any obvious waste in your current stack. Your team is highly optimized.</p>
+                <p className="sp-success-box__title">You&apos;re spending well!</p>
+                <p className="sp-success-box__body">We couldn&apos;t find any obvious waste in your current stack. Your team is highly optimized.</p>
               </div>
             ) : (
               <div className="sp-rec-list">
@@ -399,13 +399,13 @@ export default function SpendForm() {
               <>
                 {report.totalMonthlySavings >= 500 ? (
                   <div className="sp-lead__header">
-                    <h3 className="sp-lead__title">Don't leave <span className="text-gradient">${report.totalAnnualSavings.toFixed(0)}</span> on the table.</h3>
+                    <h3 className="sp-lead__title">Don&apos;t leave <span className="text-gradient">${report.totalAnnualSavings.toFixed(0)}</span> on the table.</h3>
                     <p className="sp-lead__subtitle">Your infrastructure footprint is large enough to qualify for wholesale credit pooling. Book a Credex consultation to capture these savings.</p>
                   </div>
                 ) : report.totalMonthlySavings < 100 || report.recommendations.length === 0 ? (
                   <div className="sp-lead__header">
-                    <h3 className="sp-lead__title sp-lead__title--green">You're spending well.</h3>
-                    <p className="sp-lead__subtitle">We couldn't find major waste. But AI pricing changes weekly. Drop your email and we'll notify you when new optimizations apply to your stack.</p>
+                    <h3 className="sp-lead__title sp-lead__title--green">You&apos;re spending well.</h3>
+                    <p className="sp-lead__subtitle">We couldn&apos;t find major waste. But AI pricing changes weekly. Drop your email and we&apos;ll notify you when new optimizations apply to your stack.</p>
                   </div>
                 ) : (
                   <div className="sp-lead__header">

@@ -19,7 +19,7 @@
 
 **Plan for tomorrow:** Integrate an LLM API (Anthropic or Gemini) to generate the personalized ~100-word audit summary (Feature 4), ensure it has a graceful fallback mechanism if the API fails, and draft the 5 mandatory automated tests for the audit engine.
 
-## Day 3 and 4 2026-05-23
+## Day 3 and 4 2026-05-23 / 2026-05-24
 **Hours worked:** 3.0
 **What I did:** - Built the Results Dashboard (Feature 3) with a 3-tier dynamic lead capture form based on the user's calculated savings.
 - Engineered `app/api/generate-summary/route.ts` to securely handle AI requests on the server side.
@@ -33,7 +33,7 @@
 
 **Plan for tomorrow:** Build Feature 5: The Backend Lead Capture. I will set up a database to securely store the emails users submit when they want to save their audit or get notified of future savings.
 
-## Day 5 2026-05-24
+## Day 5 2026-05-25
 **Hours worked:** 2.5
 **What I did:** - Set up a Firebase project and integrated Firestore to securely capture and store user leads (Feature 5).
 - Implemented an invisible "Honeypot" form field as a frictionless, zero-dependency method for basic abuse protection.
@@ -47,13 +47,8 @@
 
 **Plan for tomorrow:** Submit the final assignment repo, start reviewing the feedback from my user interviews, and take a well-deserved break!
 
-**Day 6: The Viral Loop & Server-Side Rendering**
-* Built the shareable public report URL (`/report/[id]`).
-* Engineered the page to fetch Firestore data via REST on the server, completely stripping out PII (email/company) before it reaches the client.
-* Implemented dynamic Open Graph (OG) metadata to generate Twitter/LinkedIn cards that prominently display the user's calculated savings dollar amount to drive viral click-throughs.
-* Resolved Next.js 15 breaking changes regarding asynchronous `Promise`-based routing parameters.
+## Day 6 2026-05-26
 
-## Day 6 2026-05-25
 **Hours worked:** 2.0
 **What I did:** - Engineered the "Viral Loop" by creating a dynamic, shareable public report URL (Feature 6).
 - Updated the Firebase payload to store the full stack configuration and recommendation array so the public link has data to render.

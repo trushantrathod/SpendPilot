@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+```markdown
+# SpendPilot (Credex AI Stack Auditor)
 
-## Getting Started
+SpendPilot is a lead-generation auditing web application designed for startup founders and engineering managers to uncover hidden overspending and redundancies within their AI infrastructure[cite: 30]. Acting as a "Mint for AI tool spend," it allows users to input their current subscriptions and instantly receive a financial breakdown, alternative recommendations, and a path to wholesale credit pooling via Credex[cite: 29, 30].
 
-First, run the development server:
+## Live Application
+* **Production Deployed URL:** https://spend-pilot-sandy.vercel.app/ [cite: 124]
+
+## Quick Start Guide
+
+### 1. Local Development Setup
+Ensure you have Node.js 18+ installed on your local machine[cite: 122].
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone [https://github.com/trushantrathod/SpendPilot.git]
+cd spend-pilot
+
+# Install dependency tree
+npm install
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Configure your local environmental variables by creating a `.env.local` file in the root directory:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+GEMINI_API_KEY=your_google_gemini_api_key
+RESEND_API_KEY=your_resend_api_key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
 
-## Learn More
+```bash
+# Boot the local Next.js development server
+npm run dev
 
-To learn more about Next.js, take a look at the following resources:
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Navigate to `http://localhost:3000` to interact with the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Running the Test Suite
 
-## Deploy on Vercel
+The deterministic financial engine is audited using isolated unit test configurations.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Execute unit testing suite via Jest
+npm run test
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+
+### 3. Production Deployment
+
+This platform is architected for instant deployment using the Vercel Edge Network.
+
+1. Push your repository to GitHub.
+2. Import the project into Vercel.
+
+
+3. Add your `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `GEMINI_API_KEY`, and `RESEND_API_KEY` into the Vercel Environment Variables console.
+4. Click **Deploy**.
+
+---
+
+## Decisions: 5 Engineering & Product Trade-Offs
+
+During this 7-day sprint, the following architectural and product decisions were made to balance speed, performance, and reliability:
+
+1. **Deterministic vs. Stochastic Auditing Engine:** I hardcoded the pricing math rules in `lib/auditEngine.ts` instead of using an LLM to parse numbers. **Why:** Financial auditing requires absolute precision and auditability; stochastic LLMs risk calculation hallucination, which destroys user trust. AI was reserved exclusively for the qualitative executive summary.
+
+
+2. **Server-Side REST Calls over Firebase Client SDK:** To build dynamic public report routes (`/report/[id]`), I chose to utilize native server-side `fetch` hitting the Google Firestore REST API directly instead of initializing the heavy Firebase Client SDK. **Why:** This bypassed complex client-side authentication listeners, minimized bundled JavaScript, and allowed the Open Graph tags to render flawlessly on the server for viral sharing.
+
+
+3. **Frictionless UI/UX Email Gating:** I built an open entry pipeline where users get full interactive access to the audit engine dashboard completely free without upfront signup. **Why:** The email lead capture field is exclusively injected *after* financial value is proven on-screen. This trade-off risks anonymous API usage but vastly maximizes B2B conversion rates by building upfront trust.
+
+
+4. 
+**CSS Honeypot over hCaptcha Vendor Packages:** To secure lead generation pipelines from automated spam scripts, I constructed a zero-dependency invisible CSS honeypot rather than using hCaptcha. **Why:** Captchas introduce severe user friction and heavy third-party JavaScript that damages Lighthouse performance scores. A honeypot provides robust basic spam protection while keeping the UI frictionless and Lighthouse scores at 98+.
+
+
+5. **Next.js 15 Async Routing API Adaptation:** Adopting Next.js 15 introduced a breaking change where dynamic route parameters are structured as native Promises. **Why:** Instead of reverting to Next.js 14, I refactored the infrastructure to explicitly handle `await params` within server-side components. This trade-off required slightly more complex data-fetching logic but ensured the application is built on the most modern, future-proof Next.js architecture.

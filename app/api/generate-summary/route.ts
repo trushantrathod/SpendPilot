@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const prompt = `
       You are an expert SaaS financial auditor. Write a 80-100 word executive summary for a company with ${state.teamSize} employees. 
-      Their total monthly AI spend is $${state.tools.reduce((acc: number, t: any) => acc + t.spend, 0)}.
+      Their total monthly AI spend is $${state.tools.reduce((acc: number, t: { spend: number }) => acc + t.spend, 0)}.
       We found $${report.totalMonthlySavings} in potential monthly savings by recommending they cancel certain tools.
       Write a compelling, professional summary of these findings. Do NOT use bullet points. Do NOT include greetings or sign-offs. Be direct and analytical.
     `;

@@ -14,7 +14,7 @@ export default function Home() {
           Stop overpaying for AI.
         </h1>
         <p className="text-xl text-slate-400 max-w-2xl mx-auto font-light">
-          Enter your stack below to see if you're on the wrong plans, using overlapping tools, or missing out on infrastructure credits.
+          Enter your stack below to see if you&apos;re on the wrong plans, using overlapping tools, or missing out on infrastructure credits.
         </p>
       </div>
       

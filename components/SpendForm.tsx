@@ -194,11 +194,11 @@ export default function SpendForm() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
 
-  useEffect(() => {
+useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("spendpilot_state");
     if (saved) {
-      try { setState(JSON.parse(saved)); } catch { console.error("Failed to parse saved state"); }
+      try { setState(JSON.parse(saved)); } catch { console.error("Failed to parse"); }
     }
   }, []);
 

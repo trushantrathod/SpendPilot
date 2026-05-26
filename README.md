@@ -1,15 +1,15 @@
 ```markdown
 # SpendPilot (Credex AI Stack Auditor)
 
-SpendPilot is a lead-generation auditing web application designed for startup founders and engineering managers to uncover hidden overspending and redundancies within their AI infrastructure[cite: 30]. Acting as a "Mint for AI tool spend," it allows users to input their current subscriptions and instantly receive a financial breakdown, alternative recommendations, and a path to wholesale credit pooling via Credex[cite: 29, 30].
+SpendPilot is a lead-generation auditing web application designed for startup founders and engineering managers to uncover hidden overspending and redundancies within their AI infrastructure. Acting as a "Mint for AI tool spend," it allows users to input their current subscriptions and instantly receive a financial breakdown, alternative recommendations, and a path to wholesale credit pooling via Credex.
 
 ## Live Application
-* **Production Deployed URL:** https://spend-pilot-sandy.vercel.app/ [cite: 124]
+* **Production Deployed URL:** https://spend-pilot-git-main-trushants-projects-c8717afb.vercel.app/
 
 ## Quick Start Guide
 
 ### 1. Local Development Setup
-Ensure you have Node.js 18+ installed on your local machine[cite: 122].
+Ensure you have Node.js 18+ installed on your local machine.
 
 ```bash
 # Clone the repository

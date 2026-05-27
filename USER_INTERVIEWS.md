@@ -1,34 +1,36 @@
-# Engineering Reflection & Self-Assessment
+# Target Profile User Research & Insights
 
-## 1. The hardest bug hit this week and the diagnostic process
-The most stubborn obstacle encountered during this sprint was a silent data-fetching failure on the dynamic public report page (`app/report/[id]/page.tsx`). Initially, I leveraged the standard Firebase Client SDK within a `useEffect` hook to fetch saved lead data. While this worked perfectly on localhost, it completely broke when deployed onto Vercel, throwing a generic 404/500 error cascade on initial page rendering. 
+To ensure the SpendPilot architecture solved a genuine problem, I conducted three 10-15 minute diagnostic interviews with peers currently managing software development projects.
 
-My initial hypothesis was that the environment variables were not being injected properly at runtime into the client bundle. After executing a series of server-side `console.log` deep-dives, I discovered that the environment keys were populated, but the Vercel serverless functions were timing out because the client-side Firebase authentication listeners were blocking the component from resolving during initial generation. 
+---
 
-To resolve this, I completely shifted the fetching architecture away from the client SDK. I formulated a new hypothesis: hitting the raw Google Firestore REST API via standard server-side `fetch` would bypass the client bundle overhead entirely. I refactored the function to use an asynchronous server-side fetch layout hitting: `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/leads/${id}`. This immediately solved the problem, drastically minimized the bundled JavaScript payload sent to the client, and ensured that the open-graph scrapers could parse the static metadata flawlessly.
+## Interview 1: Tejas Rathod
+* **Role & Stage:** Independent Developer / Solo Founder, currently bootstrapping two SaaS side-projects.
+* **Direct Quotes:**
+  1. *"Honestly, I just sign up for whatever free tier is available until the rate limits break, then I panic-upgrade to Pro."*
+  2. *"I'm paying $20 for ChatGPT Plus and $20 for Cursor, and I'm pretty sure I don't even use half the limits on either of them."*
+  3. *"If an app told me I was wasting money, I’d probably ignore it unless it showed me the exact button to click to downgrade or switch."*
+* **The Most Surprising Insight:** Solo developers do not care about "optimizing" until their monthly bill crosses a psychological threshold (usually around $50/mo). Below that, the convenience of overlapping tools outweighs the cost.
+* **What it Changed About My Design:** I realized that pushing a "consultation" to a solo dev saving $20 is terrible UX. I updated the audit engine logic to only trigger the Credex consultation CTA for audits showing >$500 in savings, routing smaller accounts to a simple email newsletter instead.
 
-## 2. An engineering decision reversed mid-week and the justification
-Midway through the sprint, I initially architected the audit engine (`lib/auditEngine.ts`) to lean on live asynchronous AI evaluations via the Google Gemini API to dynamically determine if a user's tool layout was unoptimized. My rationale was that an LLM would effortlessly catch messy or unpredictable input variations from the text fields. 
+---
 
-However, during active integration testing, I reversed this decision entirely and moved to a purely deterministic, hardcoded programmatic rule model. The reversal was driven by two core flaws: latency spikes and execution unpredictability (hallucinations). During testing, Gemini would occasionally state that a $20 Cursor plan could be downgraded to a nonexistent $5 tier, or it would provide inconsistent calculation math for the exact same inputs. 
+## Interview 2: Shreya Chaudhari
+* **Role & Stage:** Technical Lead / Computer Engineering Student building active hackathon and open-source projects.
+* **Direct Quotes:**
+  1. *"Whenever we form a team, everyone just brings their own API keys, and we end up hitting limits on individual accounts instead of pooling them."*
+  2. *"I didn't even realize GitHub Copilot had different organizational tiers until we got locked out of a student pack."*
+  3. *"The hardest part isn't knowing we are overspending; it's figuring out which LLM is actually necessary for the specific backend tasks we are running."*
+* **The Most Surprising Insight:** A lot of shadow-spending happens because team members default to using their personal, retail-priced accounts for collaborative projects instead of setting up a centralized organization tier.
+* **What it Changed About My Design:** I added a specific "Team Size" input multiplier in the form. The engine now calculates if a team is paying retail for individual seats and automatically recommends shifting to a centralized API or wholesale pool if the headcount justifies it.
 
-In a financial auditing application, precision is paramount to build user trust. If a financial officer reads an audit that hallucinates baseline costs, the entire product's validity drops to zero. By moving to strict, deterministic control conditional branches (e.g., explicitly tracking if a team size uses multiple distinct IDE tools simultaneously), I guaranteed absolute mathematical precision, drastically reduced server-side processing lag, and avoided hitting external API rate limits entirely.
+---
 
-## 3. Scope expansion: What to build in Week 2
-If granted an expansion sprint into Week 2, the development roadmap would prioritize implementing programmatic automated reporting transformations and benchmarking:
-* **Asynchronous Server-Driven PDF Rendering:** Constructing a dedicated API endpoint using `puppeteer-core` or `@react-pdf/renderer` to let users convert their on-screen breakdown into a presentation-ready PDF report instantly with one click.
-* **Granular Benchmark Metrics Engine:** Transitioning the platform from a flat rule evaluator to an aggregate benchmarking ecosystem. The tool will calculate the exact developer spend per seat and display a comparison dial against curated industry averages based on the company's operational lifecycle phase (e.g., "Your team spends 23% more on AI subscriptions than the average Series A startup"). This heightens the emotional trigger to book a high-savings consultation with Credex.
-
-## 4. AI Tool Collaboration & Disclosure
-Throughout this sprint, I actively utilized Cursor and Claude 3.5 Sonnet to accelerate structural code composition. AI tools were predominantly tasked with scaffolding the boilerplate SVG icons, generating standard HTML interface layouts, and constructing complex Tailwind v4 keyframe animations. 
-
-I explicitly chose *not* to trust the AI tools with the architectural database separation logic or the core priority rules inside the math engine. AI engines routinely misinterpret conditional hierarchies when multiple variables cross over (like checking team size, use-case alignment, and specific vendor spend simultaneously), which frequently leads to double-counting optimization savings. 
-
-A specific instance where the AI hallucinated occurred when configuring the dynamic dynamic routing for Next.js 15. The AI generated a synchronous parameter read layout (`params.id`), entirely unaware that Next.js 15 treats dynamic parameters as native asynchronous Promises. This resulted in an application crash. I immediately identified the version mismatch, caught the warning flags, and refactored the code to use the modern asynchronous `await params` syntax.
-
-## 5. Structured Competency Self-Rating
-* **Discipline: 9/10** — Maintained a highly structured daily development cadence across 6 distinct calendar days, tracking progress cleanly via conventional commits rather than single-day rushing.
-* **Code Quality: 9/10** — Maintained strict TypeScript typings throughout, moving styles out of React strings and into structured global CSS layers to support caching.
-* **Design Sense: 8/10** — Created a modern, premium glassmorphism interface with smooth user interaction feedback loops, though mobile data-grid rendering still has minor padding edge-cases.
-* **Problem Solving: 9/10** — Swiftly diagnosed Next.js 15 breaking changes and bypassed Firebase initialization hurdles by pivoting to raw REST API requests.
-* **Entrepreneurial Thinking: 10/10** — Understood that showing free upfront value before dropping an email gate maximizes B2B conversions and turns a simple audit into a highly efficient customer-acquisition asset.
+## Interview 3: Akash Singh
+* **Role & Stage:** Junior Engineering Manager, Series A B2B Startup (team of ~15 developers).
+* **Direct Quotes:**
+  1. *"Finance asked me for a breakdown of our OpenAI API costs last month, and I literally just sent them a screenshot of our usage dashboard because I couldn't make sense of the token math."*
+  2. *"We hand out Cursor Pro licenses like candy during onboarding. I know for a fact three of our front-end guys haven't used the AI features in weeks."*
+  3. *"I would use an audit tool, but I am absolutely not uploading our corporate billing CSVs to a random website."*
+* **The Most Surprising Insight:** The absolute lack of trust regarding financial data. Engineering managers are desperate for cost visibility but are terrified of data leaks.
+* **What it Changed About My Design:** This entirely shaped the UX of the input form. I scrapped the idea of OAuth or uploading billing invoices. The tool only asks for manual, aggregate, anonymized numbers up front, and I explicitly state on the page that no corporate data is stored without permission.

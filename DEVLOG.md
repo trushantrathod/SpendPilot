@@ -61,3 +61,4 @@
 
 **Blockers / what I'm stuck on:** I hit a 404 error when setting up the dynamic route because I accidentally placed the `report` folder inside the `api` directory, which confused the Next.js App Router. I also hit a minor build error due to the Next.js 15 `Promise` update, but quickly debugged and resolved both issues.
 
+Additional Debugging: My GitHub Actions CI pipeline failed during the ESLint step due to TypeScript and React linting issues, including usage of any, unescaped apostrophes in JSX, and unused variables. I resolved the issues by replacing unsafe types, escaping special characters properly, and cleaning unused code to restore a successful production build.
